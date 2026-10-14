@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusGuard AI - Municipal Control Center</title>
+    <!-- Leaflet GIS Map Styling Infrastructure -->
+    <link rel="stylesheet" href="https://unpkg.com" />
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --secondary: #0f172a;
+            --danger: #dc2626;
+            --warning: #ca8a04;
+            --success: #16a34a;
+            --bg: #f8fafc;
+        }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 0; background-color: var(--bg); color: #334155; }
+        header { background: var(--secondary); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        header h1 { margin: 0; font-size: 24px; display: flex; align-items: center; gap: 10px; }
+        .live-indicator { background: var(--danger); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; animation: blink 1.5s infinite; letter-spacing: 1px;}
+               .wrapper { 
+            max-width: 1400px; 
+            margin: 30px auto; 
+            padding: 0 20px; 
+            display: grid; 
+            grid-template-columns: 1fr; /* This fixes the layout split */
+            gap: 30px; 
+        }
+        
+        #map-container { 
+            height: 450px; 
+            background: white; 
+            border-radius: 12px; 
+            border: 1px solid #e2e8f0; 
+            overflow: hidden; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+            position: relative; 
+            width: 100%; /* This stretches the map across the screen */
+        }
+
+        .hazard-item.medium { border-left-color: var(--warning); background: #fffbeb; }
+        .item-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .item-title { font-weight: bold; font-size: 16px; color: #1e293b; text-transform: uppercase; }
+        .severity-badge { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 4px; color: white; text-transform: uppercase; }
+        .severity-badge.high { background: var(--danger); }
+        .severity-badge.medium { background: var(--warning); }
+        .meta-text { font-size: 14px; color: #475569; margin: 2px 0; }
+        .directive-box { background: rgba(255,255,255,0.8); border: 1px dashed #cbd5e1; padding: 12px; border-radius: 6px; font-size: 14px; margin-top: 5px; }
+        .hazard-item.high .directive-box { border-color: #fca5a5; color: #991b1b; }
+        .hazard-item.medium .directive-box { border-color: #fde68a; color: #854d0e; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🏫 CampusGuard AI: Autonomous School Zone Safety Panel</h1>
+        <div class="live-indicator">● PROTOTYPE ENGINE ACTIVE</div>
+    </header>
+
+    <div class="wrapper">
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>Total School Zones Audited</h3>
+                <div class="value" id="m-audited">142</div>
+            </div>
+            <div class="metric-card">
+                <h3>Active Network Transit Feeds</h3>
+                <div class="value" style="color: var(--success);">28 / Active</div>
+            </div>
+            <div class="metric-card">
+                <h3>Critical Safety Hazards Found</h3>
+                <div class="value" id="m-critical" style="color: var(--danger);">2</div>
+            </div>
+            <div class="metric-card">
+                <h3>Dispatched Work Orders</h3>
+                <div class="value" id="m-dispatched">41</div>
+            </div>
+        </div>
+
+        <div class="main-panel">
+            <div id="map-container">
+                <div id="map"></div>
+            </div>
+
+            <div class="queue-section">
+                <div class="queue-title">
+                    <span>📋 Active Infrastructure Incident Registry Queue</span>
+                    <span style="font-size:14px; color:#64748b;" id="queue-count">2 Hazards Tracked</span>
+                </div>
+                <div class="hazard-list" id="hazard-list-container">
+                    <div class="hazard-item high">
+                        <div class="item-header">
+                            <span class="item-title">⚠️ FADED CROSSWALK ANOMALY DETECTED</span>
+                            <span class="severity-badge high">High Urgency</span>
+                        </div>
+                        <div class="meta-text">📍 <strong>Location Matrix Coordinates:</strong> Near Oakridge School (16.4253, 80.5312)</div>
+                        <div class="meta-text">📝 <strong>AI Vision Analysis Narrative:</strong> Pedestrian safety marking arrays are over 85% worn away, presenting severe validation risks during student crossing transitions.</div>
+                        <div class="directive-box">
+                            <strong>🔧 Automated Maintenance Command Order:</strong> Route emergency street painters to execute re-striping execution protocols prior to the morning entry rush hour.
+                        </div>
+                    </div>
+
+                    <div class="hazard-item medium">
+                        <div class="item-header">
+                            <span class="item-title">⚠️ OBSCURED REGULATORY TRAFFIC ROUTE SIGN</span>
+                            <span class="severity-badge medium">Medium Urgency</span>
+                        </div>
+                        <div class="meta-text">📍 <strong>Location Matrix Coordinates:</strong> St. Mary Primary Way (16.4310, 80.5295)</div>
+                        <div class="meta-text">📝 <strong>AI Vision Analysis Narrative:</strong> Speed zone restriction warnings are fully obscured by low-hanging foliage canopies, causing tracking opacity failure for approaching drivers.</div>
+                        <div class="directive-box">
+                            <strong>🔧 Automated Maintenance Command Order:</strong> Dispatch park engineering crews to clean and trim intersecting vegetation obstacles immediately.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-panel">
+            <div class="control-box">
+                <h3 style="margin-top:0; color:var(--secondary);">🕹️ Ingestion Command Matrix</h3>
+                <p style="font-size:14px; color:#64748b; line-height:1.5;">Simulate a vehicle transit pass using connected mobile telemetry. Ingestion packages are pushed directly to Gemini 1.5 Flash to evaluate structural health vulnerabilities.</p>
+                <button class="btn" onclick="triggerAdvancedSimulation()">⚡ Trigger Live Ingestion Sequence</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet Engine Geographical Asset Scripting Layer -->
+    <script src="https://unpkg.com"></script>
+    <script>
+        // Set up the geographical map engine tracking systems
+        const map = L.map('map').setView([16.4253, 80.5312], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Render base operational tracking pins onto mapping viewports
+        L.marker([16.4253, 80.5312]).addTo(map).bindPopup('<b>Oakridge International</b><br>Hazard Type: Faded Crosswalk').openPopup();
+        L.marker([16.4310, 80.5295]).addTo(map).bindPopup('<b>St. Mary Primary</b><br>Hazard Type: Obscured Sign');
+
+                async function triggerAdvancedSimulation() {
+            const listContainer = document.getElementById('hazard-list-container');
+            const originalHTML = listContainer.innerHTML;
+            
+            listContainer.innerHTML = `<h3 style='color: #2563eb; text-align:center; padding:30px;'>🔄 Ingesting Live Video Payload Stream... Connecting with Gemini 1.5 Flash API...</h3>`;
+            
+            try {
+                const res = await fetch('/api/analyze', { method: 'POST' });
+                const data = await res.json();
+                
+                // Add a new dynamic tracking pin coordinating to the live map update
+                const targetLat = 16.4190;
+                
+                // ==========================================
+                // START OF THE PART YOU SHARED:
+                // ==========================================
+                const targetLng = 80.5401;
+                
+                map.setView([targetLat, targetLng], 14);
+                L.marker([targetLat, targetLng]).addTo(map).bindPopup(`<b>Critical Hazard</b><br>${data.hazard_type}`).openPopup();
+
+                // Increment dashboard metric layers
+                document.getElementById('m-critical').innerText = "3";
+                document.getElementById('m-audited').innerText = "143";
+                document.getElementById('m-dispatched').innerText = "42";
+                document.getElementById('queue-count').innerText = "3 Hazards Tracked";
+
+                const formattedType = data.hazard_type.replace(/_/g, ' ').toUpperCase();
+
+                listContainer.innerHTML = `
+                    <div class="hazard-item high" style="animation: slideIn 0.4s ease-out;">
+                        <div class="item-header">
+                            <span class="item-title" style="color:#b91c1c;">🚨 LIVE ANOMALY DISCOVERED: BY GEMINI 1.5 FLASH</span>
+                            <span class="severity-badge high">Critical Urgency</span>
+                        </div>
+                        <div class="meta-text">📍 <strong>Location Matrix Coordinates:</strong> Intersection District Sector (16.4190, 80.5401)</div>
+                        <div class="meta-text"><strong>Anomaly Type:</strong> ${formattedType}</div>
+                        <div class="meta-text">📝 <strong>AI Vision Analysis Narrative:</strong> ${data.description}</div>
+                        <div class="meta-text directive-box">
+                            <strong>🔧 Automated Maintenance Command Order:</strong> ${data.recommended_action}
+                        </div>
+                    </div>
+                    ${originalHTML}
+                `;
+            } catch (err) {
+                listContainer.innerHTML = originalHTML + `<p style="color:red; padding:10px;">Simulation Execution Failed: ${err.message}</p>`;
+            }
+            // ==========================================
+            // END OF THE PART YOU SHARED
+            // ==========================================
+        }
